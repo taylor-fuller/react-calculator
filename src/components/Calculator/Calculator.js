@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Calculator.css'
 import Button from './Button/Button';
 
@@ -95,7 +95,7 @@ const Calculator = () => {
                         return
                     } else {
                         // if firstTerm is not null and does not have a length of 1, concat number to current number
-                        setFirstTerm(firstTerm + '' + String(number))
+                        setFirstTerm(firstTerm + String(number))
                     }
                 }
             }
@@ -113,7 +113,7 @@ const Calculator = () => {
                         return
                     } else {
                         // if secondTerm is not null and does not have a length of 1, concat number to current number
-                        setSecondTerm(secondTerm + '' + String(number))
+                        setSecondTerm(secondTerm + String(number))
                     }
                 }
             } 
