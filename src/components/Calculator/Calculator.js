@@ -14,14 +14,17 @@ const Calculator = () => {
     //     console.log(firstTerm, operator, secondTerm, value)
     // }, [firstTerm, operator, secondTerm, value])
 
-    useEffect(() => {
+    useEffect(() => { 
+        // when justCalculated is changed, we will set history and reset firstTerm, secondTerm, and operator
         if (justCalculated) {
+            // add new history entry to array and reverse so map will show most recent entries first
             setHistory([...history, {firstTerm, operator, secondTerm, value}].reverse())
             setFirstTerm(null)
             setOperator(null)
             setSecondTerm(null)
         }
         return () => {
+            // reset justCalculated on cleanup
             setJustCalculated(false)
         }
     }, [justCalculated])
@@ -37,6 +40,7 @@ const Calculator = () => {
     }
 
     function handleClickOptions(button) {
+        // if we have a value and don't have a firstTerm...
         if (value && !firstTerm) {
             if (Number.isInteger(button)) {
                 handleNumberClick(parseInt(button));
@@ -51,6 +55,7 @@ const Calculator = () => {
                 clearHistory()
             }
         } else {
+            // if we don't have a value or we have a firstTerm...
             if (Number.isInteger(button)) {
                 handleNumberClick(parseInt(button));
             } else if (["/", "x", "+", "-"].includes(button)) {
@@ -76,27 +81,38 @@ const Calculator = () => {
     }
 
     function handleNumberClick(number) {
+        //  determine if we need to add number to firstTerm or secondTerm based on whether or not there is an operator
         if (operator === null) {
-            if (!firstTerm || firstTerm.length <= 20) {
+            // if firstTerm is null or firstTerm length is less than or equal to 20...
+            if (!firstTerm || firstTerm.length < 20) {
+                //  check if firstTerm is null or not, if it is, set firstTerm to entered number on key
                 if (firstTerm === null) {
                     setFirstTerm(String(number))
+                //  if firstTerm is not null...
                 } else {
+                    // if firstTerm length is 1 and the first number is a zero, we can't add another number but we can add a decimal
                     if (firstTerm.length === 1 && firstTerm.charAt(0) === '0' && number !== '.') {
                         return
                     } else {
+                        // if firstTerm is not null and does not have a length of 1, concat number to current number
                         setFirstTerm(firstTerm + '' + String(number))
                     }
                 }
             }
-            
+        //  if we have an operator selected, modify secondTerm
         } else {
-            if (!secondTerm || secondTerm.length <= 20) {
+            // if secondTerm is null or secondTerm length is less than or equal to 20...
+            if (!secondTerm || secondTerm.length < 20) {
+                //  check if secondTerm is null or not, if it is, set secondTerm to entered number on key
                 if (secondTerm === null) {
                     setSecondTerm(String(number))
+                //  if secondTerm is not null...
                 } else {
+                    // if secondTerm length is 1 and the first number is a zero, we can't add another number but we can add a decimal
                     if (secondTerm.length === 1 && secondTerm.charAt(0) === '0' && number !== '.') {
                         return
                     } else {
+                        // if secondTerm is not null and does not have a length of 1, concat number to current number
                         setSecondTerm(secondTerm + '' + String(number))
                     }
                 }
@@ -106,17 +122,20 @@ const Calculator = () => {
     }
 
     function handleOperatorClick(operatorValue) {
+        // when an operator is clicked, verify we have a firstTerm, the final character of the firstTerm isn't a decimal, and that secondTerm is null...
         if (firstTerm && firstTerm.charAt(firstTerm.length-1) !== '.' && secondTerm === null) {
             setOperator(operatorValue)
         }
     }
 
     function handleClear(button) {
+        // if button is all clear, clear all states
         if (button === 'AC') {
             setFirstTerm(null)
             setOperator(null)
             setSecondTerm(null)
             setValue(null)
+        // else clear all but value
         } else if (button === 'C') {
             setFirstTerm(null)
             setOperator(null)
@@ -125,19 +144,27 @@ const Calculator = () => {
     }
 
     function handleDeleteNumber() {
+        // if we have a secondTerm, modify secondTerm
         if (secondTerm) {
+            //  verify secondTerm length is greater than 1 so we don't remove a number that preceeds a minus sign, leaving only the minus sign
             if (secondTerm.length > 1) {
+                // if secondTerm length is 2, check if we have a minus sign at the beginning, if we do, set secondTerm to null
                 if (secondTerm.length === 2 && secondTerm.charAt(0) === '-') {
                     setSecondTerm(null)
+                // if secondTerm has a length greater than 2...
                 } else {
                     setSecondTerm(secondTerm.slice(0,-1))
                 }
-            } else  {
+            // if secondTerm length is equal to 1, set secondTerm to null
+            } else {
                 setSecondTerm(null)
             }
+        // if we don't have a secondTerm but we have an operator, remove operator
         } else if (operator) {
             setOperator(null)
+        // if we don't have a secondTerm or an operator, modify firstTerm
         } else if (firstTerm) {
+            // repeat logic from above to prevent firstTerm from having a number removed and being left with only a minus sign
             if (firstTerm.length > 1) {
                 if (firstTerm.length === 2 && firstTerm.charAt(0) === '-') {
                     setFirstTerm(null)
@@ -151,43 +178,53 @@ const Calculator = () => {
     }
 
     function handleInverseSign() {
+        // if we have a secondTerm, modify secondTerm
         if (secondTerm) {
             setSecondTerm(String(secondTerm*-1))
+        // if we don't have a secondTerm, modify firstTerm
         } else if (firstTerm && operator === null) {
-            console.log('inverse')
             setFirstTerm(String(firstTerm*-1))
         }
     }
 
     function handlePercentage() {
+        // if we have a secondTerm, modify secondTerm
         if (secondTerm) {
             setSecondTerm(String(secondTerm/100))
+        // if we don't have a secondTerm, modify firstTerm
         } else if (firstTerm) {
             setFirstTerm(String(firstTerm/100))
         }
     }
 
     function handleDecimal() {
+        // if we have a secondTerm, modify secondTerm
         if (secondTerm) {
-            if (!/\./.test(secondTerm) && secondTerm.length <= 19) {
+            // if secondTerm doesn't already contain a decimal, and the secondTermlength is less than 19, add decimal
+            if (!/\./.test(secondTerm) && secondTerm.length < 19) {
                 setSecondTerm((secondTerm + '.'));
             }
+        // if we don't have a secondTerm, modify firstTerm
         } else if (firstTerm) {
-            if (!/\./.test(firstTerm) && firstTerm.length <= 19) {
+            // if firstTerm doesn't already contain a decimal, and the secondTermlength is less than 19, add decimal
+            if (!/\./.test(firstTerm) && firstTerm.length < 19) {
                 setFirstTerm(firstTerm + '.')
             }
         }
     }
 
     function handleAnswer() {
+        //  if we have a value, an operator and a first term, modify secondTerm
         if (value && operator && firstTerm) {
             setSecondTerm(value)
+        //  if we have a value and firstTerm is null, modify firstTerm
         } else if (value && !firstTerm) {
             setFirstTerm(value)
         }
     }
 
     function calculate() {
+        // if we have a firstTerm, operator, secondTerm, the last character in the firstTerm and the secondTerm aren't a decimal, solve 
         if (firstTerm && operator && secondTerm && firstTerm.charAt(firstTerm.length-1) !== '.' && secondTerm.charAt(secondTerm.length-1) !== '.') {
             if (operator === '+') {
                 setValue(String(parseFloat(firstTerm) + parseFloat(secondTerm)))
@@ -198,6 +235,7 @@ const Calculator = () => {
             } else if (operator === '/') {
                 setValue(String(parseFloat(firstTerm) / parseFloat(secondTerm)))
             }
+            // set justCalculated true to trigger useEffect to modify history
             setJustCalculated(true)
         }
     }
