@@ -16,11 +16,12 @@ const Calculator = () => {
     // }, [firstTerm, operator, secondTerm, value])
 
     useEffect(() => { 
-        // when justCalculated is changed, we will set history and reset firstTerm, secondTerm, and operator
+        // when isChaining is true don't reset the first term or operator
         if (isChaining) {
             setHistory([...history, {firstTerm, operator, secondTerm, value}].reverse())
             setSecondTerm(null)
         }
+        // when justCalculated is changed, we will set history and reset firstTerm, secondTerm, and operator
         else if (justCalculated) {
             // add new history entry to array and reverse so map will show most recent entries first
             setHistory([...history, {firstTerm, operator, secondTerm, value}].reverse())
@@ -29,7 +30,7 @@ const Calculator = () => {
             setSecondTerm(null)
         }
         return () => {
-            // reset justCalculated on cleanup
+            // reset justCalculated and isChaining on cleanup
             setJustCalculated(false)
             setIsChaining(false)
         }
@@ -65,6 +66,8 @@ const Calculator = () => {
             if (Number.isInteger(button)) {
                 handleNumberClick(parseInt(button));
             } else if (["/", "x", "+", "-"].includes(button)) {
+                // check if we have a firstTerm, operator, and secondTerm, if we do then we know the user is trying to chain - set isChaining true, calculate the answer and set the firtTerm to the answer, also update the operator with the new operator
+                // secondTerm will be reset in the useEffect function
                 if (firstTerm && operator && secondTerm) {
                     setIsChaining(true)
                     let calc = calculate()
