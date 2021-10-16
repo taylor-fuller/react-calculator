@@ -9,6 +9,7 @@ const Calculator = () => {
     const [value, setValue] = useState(null);
     const [history, setHistory] = useState([]);
     const [justCalculated, setJustCalculated] = useState(false);
+    const [isChaining, setIsChaining] = useState(false);
 
     // useEffect(() => {
     //     console.log(firstTerm, operator, secondTerm, value)
@@ -16,7 +17,11 @@ const Calculator = () => {
 
     useEffect(() => { 
         // when justCalculated is changed, we will set history and reset firstTerm, secondTerm, and operator
-        if (justCalculated) {
+        if (isChaining) {
+            setHistory([...history, {firstTerm, operator, secondTerm, value}].reverse())
+            setSecondTerm(null)
+        }
+        else if (justCalculated) {
             // add new history entry to array and reverse so map will show most recent entries first
             setHistory([...history, {firstTerm, operator, secondTerm, value}].reverse())
             setFirstTerm(null)
@@ -26,6 +31,7 @@ const Calculator = () => {
         return () => {
             // reset justCalculated on cleanup
             setJustCalculated(false)
+            setIsChaining(false)
         }
     }, [justCalculated])
 
@@ -59,7 +65,14 @@ const Calculator = () => {
             if (Number.isInteger(button)) {
                 handleNumberClick(parseInt(button));
             } else if (["/", "x", "+", "-"].includes(button)) {
-                handleOperatorClick(button)
+                if (firstTerm && operator && secondTerm) {
+                    setIsChaining(true)
+                    let calc = calculate()
+                    setFirstTerm(String(calc))
+                    setOperator(button)
+                } else {
+                    handleOperatorClick(button)
+                }
             } else if (button === 'del') {
                 handleDeleteNumber()
             } else if (button === 'AC' || button === 'C') {
@@ -226,17 +239,20 @@ const Calculator = () => {
     function calculate() {
         // if we have a firstTerm, operator, secondTerm, the last character in the firstTerm and the secondTerm aren't a decimal, solve 
         if (firstTerm && operator && secondTerm && firstTerm.charAt(firstTerm.length-1) !== '.' && secondTerm.charAt(secondTerm.length-1) !== '.') {
+            let calc
             if (operator === '+') {
-                setValue(String(parseFloat(firstTerm) + parseFloat(secondTerm)))
+                calc = String(parseFloat(firstTerm) + parseFloat(secondTerm))
             } else if (operator === '-') {
-                setValue(String(parseFloat(firstTerm) - parseFloat(secondTerm)))
+                calc = String(parseFloat(firstTerm) - parseFloat(secondTerm))
             } else if (operator === 'x') {
-                setValue(String(parseFloat(firstTerm) * parseFloat(secondTerm)))
+                calc = String(parseFloat(firstTerm) * parseFloat(secondTerm))
             } else if (operator === '/') {
-                setValue(String(parseFloat(firstTerm) / parseFloat(secondTerm)))
+                calc = String(parseFloat(firstTerm) / parseFloat(secondTerm))
             }
+            setValue(calc)
             // set justCalculated true to trigger useEffect to modify history
             setJustCalculated(true)
+            return calc
         }
     }
     
